@@ -119,44 +119,40 @@ func main() {
 			absentLetters = append(absentLetters, l)
 		}
 
-		words := filterWords(words, absentLetters, positionedLetters, knownLetters)
+		var newWords []string
+	Word:
+		for _, word := range words {
+			runes := []rune(word)
+			for _, l := range absentLetters {
+				if strings.Index(word, string(l)) >= 0 {
+					continue Word
+				}
+			}
+			for i, l := range positionedLetters {
+				if l == rune(0) {
+					continue
+				} else if runes[i] != l {
+					continue Word
+				}
+			}
+			if len(knownLetters) > 0 {
+				allKnown := true
+				for _, l := range knownLetters {
+					allKnown = allKnown && strings.Index(word, string(l)) >= 0
+				}
+				if !allKnown {
+					continue Word
+				}
+			}
+			newWords = append(newWords, word)
+		}
+		words = newWords
 
 		if len(words) == 0 {
 			fmt.Println("No more words found. WTF.")
 			return
 		}
 	}
-}
-
-func filterWords(words []string, absentLetters []rune, positionedLetters [5]rune, knownLetters []rune) []string {
-	var newWords []string
-Word:
-	for _, word := range words {
-		runes := []rune(word)
-		for _, l := range absentLetters {
-			if strings.Index(word, string(l)) >= 0 {
-				continue Word
-			}
-		}
-		for i, l := range positionedLetters {
-			if l == rune(0) {
-				continue
-			} else if runes[i] != l {
-				continue Word
-			}
-		}
-		if len(knownLetters) > 0 {
-			allKnown := true
-			for _, l := range knownLetters {
-				allKnown = allKnown && strings.Index(word, string(l)) >= 0
-			}
-			if !allKnown {
-				continue Word
-			}
-		}
-		newWords = append(newWords, word)
-	}
-	return newWords
 }
 
 func wordsByLetter(words []string) map[rune]stringset.Set {
