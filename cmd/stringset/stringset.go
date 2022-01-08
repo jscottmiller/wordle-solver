@@ -1,27 +1,27 @@
-package main
+package stringset
 
 import "math/rand"
 
-type set map[string]struct{}
+type Set map[string]struct{}
 
-func NewSet() set {
-	return make(set)
+func NewSet() Set {
+	return make(Set)
 }
 
-func (s set) Size() int {
+func (s Set) Size() int {
 	return len(s)
 }
 
-func (s set) Has(item string) bool {
+func (s Set) Has(item string) bool {
 	_, present := s[item]
 	return present
 }
 
-func (s set) Add(item string) {
+func (s Set) Add(item string) {
 	s[item] = struct{}{}
 }
 
-func (s set) Union(other set) set {
+func (s Set) Union(other Set) Set {
 	u := NewSet()
 	for item := range s {
 		u.Add(item)
@@ -32,7 +32,7 @@ func (s set) Union(other set) set {
 	return u
 }
 
-func (s set) Intersection(other set) set {
+func (s Set) Intersection(other Set) Set {
 	i := NewSet()
 	for item := range s {
 		if other.Has(item) {
@@ -49,7 +49,7 @@ func (s set) Intersection(other set) set {
 	return i
 }
 
-func (s set) Choose() string {
+func (s Set) Choose() string {
 	var words []string
 	for w := range s {
 		words = append(words, w)

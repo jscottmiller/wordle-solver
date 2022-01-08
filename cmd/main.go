@@ -7,6 +7,8 @@ import (
 	"os"
 	"sort"
 	"strings"
+
+	"github.com/jscottmiller/wordle-solver/cmd/stringset"
 )
 
 func main() {
@@ -34,7 +36,7 @@ func main() {
 		letters := frequentLetters(byLetter)
 
 		i := 0
-		var candidates set
+		var candidates stringset.Set
 
 		for i < 5 {
 			r := letters[i]
@@ -157,13 +159,13 @@ Word:
 	return newWords
 }
 
-func wordsByLetter(words []string) map[rune]set {
-	byLetter := make(map[rune]set)
+func wordsByLetter(words []string) map[rune]stringset.Set {
+	byLetter := make(map[rune]stringset.Set)
 
 	for _, word := range words {
 		for _, r := range word {
 			if _, ok := byLetter[r]; !ok {
-				byLetter[r] = NewSet()
+				byLetter[r] = stringset.NewSet()
 			}
 			byLetter[r].Add(word)
 		}
@@ -183,7 +185,7 @@ func (p pairList) Len() int           { return len(p) }
 func (p pairList) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
 func (p pairList) Less(i, j int) bool { return p[i].Value >= p[j].Value }
 
-func frequentLetters(byLetter map[rune]set) []rune {
+func frequentLetters(byLetter map[rune]stringset.Set) []rune {
 	counts := make(map[rune]int)
 	for r, words := range byLetter {
 		counts[r] = words.Size()
