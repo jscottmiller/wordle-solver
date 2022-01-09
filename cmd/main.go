@@ -46,7 +46,7 @@ func main() {
 		fmt.Printf("Guess: %q\n", guess)
 
 		input := bufio.NewScanner(os.Stdin)
-		fmt.Print("Correct? (y/n)")
+		fmt.Print("Correct? (y/n) ")
 		if input.Scan() {
 			if input.Text() == "y" {
 				return

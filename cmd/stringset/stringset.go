@@ -1,7 +1,6 @@
 package stringset
 
 import (
-	"fmt"
 	"sort"
 )
 
@@ -72,6 +71,5 @@ func (s Set) Choose(bias map[string]int) string {
 		})
 	}
 	sort.Sort(words)
-	fmt.Println(words)
 	return words[0].word
 }
