@@ -6,29 +6,19 @@ import (
 	"log"
 	"os"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/jscottmiller/wordle-solver/cmd/stringset"
 )
 
 func main() {
-	f, err := os.Open("words.txt")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	var words []string
-	s := bufio.NewScanner(f)
-
-	for s.Scan() {
-		words = append(words, s.Text())
-	}
-	if err := s.Err(); err != nil {
-		log.Fatal(err)
-	}
+	words := readWords()
+	frequencies := readFrequencies()
 
 	var positionedLetters [5]rune
 	var knownLetters []rune
+	var incorrectLetters [5][]rune
 	var absentLetters []rune
 
 	for {
@@ -38,7 +28,7 @@ func main() {
 		i := 0
 		var candidates stringset.Set
 
-		for i < 5 {
+		for i < len(letters) && (candidates == nil || candidates.Size() > 10) {
 			r := letters[i]
 			if candidates == nil {
 				candidates = byLetter[r]
@@ -52,7 +42,7 @@ func main() {
 			i += 1
 		}
 
-		guess := candidates.Choose()
+		guess := candidates.Choose(frequencies)
 		fmt.Printf("Guess: %q\n", guess)
 
 		input := bufio.NewScanner(os.Stdin)
@@ -99,6 +89,7 @@ func main() {
 						goto GetYellow
 					}
 					knownLetters = append(knownLetters, letter)
+					incorrectLetters[idx] = append(incorrectLetters[idx], letter)
 				}
 				break YellowLoop
 			}
@@ -128,6 +119,13 @@ func main() {
 					continue Word
 				}
 			}
+			for i, letters := range incorrectLetters {
+				for _, l := range letters {
+					if strings.Index(word, string(l)) == i {
+						continue Word
+					}
+				}
+			}
 			for i, l := range positionedLetters {
 				if l == rune(0) {
 					continue
@@ -153,6 +151,54 @@ func main() {
 			return
 		}
 	}
+}
+
+func readWords() []string {
+	f, err := os.Open("words.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+
+	var words []string
+	s := bufio.NewScanner(f)
+
+	for s.Scan() {
+		words = append(words, s.Text())
+	}
+	if err := s.Err(); err != nil {
+		log.Fatal(err)
+	}
+
+	return words
+}
+
+type frequency struct {
+	word  string
+	count int
+}
+
+func readFrequencies() map[string]int {
+	f, err := os.Open("counts.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+
+	counts := make(map[string]int)
+	s := bufio.NewScanner(f)
+
+	for s.Scan() {
+		t := s.Text()
+		p := strings.Split(t, " ")
+		count, _ := strconv.Atoi(p[1])
+		counts[p[0]] = count
+	}
+	if err := s.Err(); err != nil {
+		log.Fatal(err)
+	}
+
+	return counts
 }
 
 func wordsByLetter(words []string) map[rune]stringset.Set {

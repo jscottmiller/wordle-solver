@@ -1,6 +1,9 @@
 package stringset
 
-import "math/rand"
+import (
+	"fmt"
+	"sort"
+)
 
 type Set map[string]struct{}
 
@@ -49,11 +52,26 @@ func (s Set) Intersection(other Set) Set {
 	return i
 }
 
-func (s Set) Choose() string {
-	var words []string
+type wordCountPair struct {
+	word  string
+	count int
+}
+
+type byFrequency []wordCountPair
+
+func (a byFrequency) Len() int           { return len(a) }
+func (a byFrequency) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a byFrequency) Less(i, j int) bool { return a[i].count > a[j].count }
+
+func (s Set) Choose(bias map[string]int) string {
+	var words byFrequency
 	for w := range s {
-		words = append(words, w)
+		words = append(words, wordCountPair{
+			w,
+			bias[w],
+		})
 	}
-	idx := rand.Intn(len(words))
-	return words[idx]
+	sort.Sort(words)
+	fmt.Println(words)
+	return words[0].word
 }
